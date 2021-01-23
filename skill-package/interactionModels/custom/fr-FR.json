@@ -1,0 +1,293 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "mon podcast du soir",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "bye",
+            "stop",
+            "quitter"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": [
+            "tintin"
+          ]
+        },
+        {
+          "name": "AMAZON.PauseIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.ResumeIntent",
+          "samples": []
+        },
+        {
+          "name": "StartSoundIntent",
+          "slots": [],
+          "samples": [
+            "lecture",
+            "joue",
+            "démarre"
+          ]
+        },
+        {
+          "name": "TitleIntent",
+          "slots": [
+            {
+              "name": "Title",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "joue le titre {Title}",
+            "{Title}",
+            "titre {Title}",
+            "morceau {Title}",
+            "joue le morceau {Title}"
+          ]
+        },
+        {
+          "name": "AMAZON.StartOverIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NextIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PreviousIntent",
+          "samples": []
+        },
+        {
+          "name": "ForwardIntent",
+          "slots": [
+            {
+              "name": "Delay_up",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "avance la lecture de {Delay_up} secondes",
+            "avance la lecture de {Delay_up}",
+            "plus {Delay_up} ",
+            "avance de {Delay_up} ",
+            "avance de {Delay_up} secondes"
+          ]
+        },
+        {
+          "name": "BackwardIntent",
+          "slots": [
+            {
+              "name": "Delay_down",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "recule de {Delay_down} secondes",
+            "moins {Delay_down}",
+            "recule de {Delay_down}",
+            "recule la lecture de {Delay_down}"
+          ]
+        },
+        {
+          "name": "SynopsisIntent",
+          "slots": [
+            {
+              "name": "SynTitle",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{SynTitle}"
+              ]
+            }
+          ],
+          "samples": [
+            "à propos",
+            "synopsis",
+            "de quoi parle le titre",
+            "résumé du morceau",
+            "résumé",
+            "résumé du titre"
+          ]
+        },
+        {
+          "name": "LastIntent",
+          "slots": [],
+          "samples": [
+            "morceau joué la dernière fois",
+            "dernier titre",
+            "dernier morceau joué",
+            "dernier morceau",
+            "dernier podcast joué",
+            "dernier podcast"
+          ]
+        },
+        {
+          "name": "ListIntent",
+          "slots": [],
+          "samples": [
+            "liste des titres",
+            "quel sont les titres",
+            "quel sont les morceaux",
+            "liste des morceaux",
+            "liste des podcasts",
+            "liste"
+          ]
+        },
+        {
+          "name": "UpdateIntent",
+          "slots": [],
+          "samples": [
+            "charge la liste",
+            "mets à jour la liste"
+          ]
+        },
+        {
+          "name": "StartAtOffsetIntent",
+          "slots": [
+            {
+              "name": "Offset",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "joue à partir de {Offset}",
+            "commence à partir de {Offset}",
+            "démarre à {Offset}",
+            "va jusqu\u0027à {Offset}",
+            "va à {Offset} "
+          ]
+        }
+      ],
+      "types": []
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "TitleIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "Title",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.801172288486"
+          },
+          "slots": []
+        },
+        {
+          "name": "AMAZON.StartOverIntent",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.801172288486"
+          },
+          "slots": []
+        },
+        {
+          "name": "ForwardIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "Delay_up",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ]
+        },
+        {
+          "name": "BackwardIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "Delay_down",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ]
+        },
+        {
+          "name": "SynopsisIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "SynTitle",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1416608694730.418053529939"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "prompts": [
+      {
+        "id": "Confirm.Intent.873890433490",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Vous voulez jouer le titre {Title} c\u0027est bien ça?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.801172288486",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Etes vous sûr de vouloir recommencer le podcast du début?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1416608694730.418053529939",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "quel numéro?"
+          },
+          {
+            "type": "PlainText",
+            "value": "quel morceau?"
+          },
+          {
+            "type": "PlainText",
+            "value": "quel numéro de titre?"
+          }
+        ]
+      }
+    ]
+  },
+  "version": "50"
+}

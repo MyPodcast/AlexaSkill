@@ -1,0 +1,86 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "fr-FR": {
+          "summary": "Joue la liste de vos podcasts.",
+          "examplePhrases": [
+            "Alexa, ouvre mon podcast du soir",
+            "liste",
+            "aide"
+          ],
+          "keywords": [
+            "Podcasts",
+            "MP3",
+            "Audio",
+            "Cloud",
+            "GitHub"
+          ],
+          "name": "MyPodcast",
+          "description": "Cette skill permet à un utilisateur de jouer la liste de ses podcasts préalablement définie à l\u0027aide d\u0027une interface web disponible à l\u0027adresse \nhttp://mypodcast.vercel.app. Nécessite pour cela un compte GitHub (gratuit). https://github.com/",
+          "smallIconUri": "file://assets/images/fr-FR_smallIconUri.png",
+          "updatesDescription": "A l\u0027origine nous avons créé cette application pour permettre à une petite fille de 11 ans de jouer ses podcasts le soir sur Alexa pour s\u0027endormir et ne plus avoir à les télécharger sur son MP3.\nv1.0.0",
+          "largeIconUri": "file://assets/images/fr-FR_largeIconUri.png"
+        }
+      },
+      "automaticDistribution": {
+        "isActive": false
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "Link with your github account.\nOpen the site : http://mypodcast.vercel.app and create your podcast list\nEdit, complete and save it.\nThen say Alexa launch Mon podcast du soir\nAlexa will list you all your podcast list\nJust say play titre and the number of your choice for playing the selected podcast.\nEnjoy!",
+      "category": "CHILDRENS_PODCASTS",
+      "distributionMode": "PUBLIC",
+      "distributionCountries": [
+        "FR"
+      ]
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "arn:aws:lambda:us-east-1:746669749825:function:94b2f7e1-7e8e-4699-a03f-cb4ab5396e00:Release_0"
+        },
+        "interfaces": [
+          {
+            "type": "AUDIO_PLAYER"
+          }
+        ],
+        "regions": {
+          "EU": {
+            "endpoint": {
+              "uri": "arn:aws:lambda:eu-west-1:746669749825:function:94b2f7e1-7e8e-4699-a03f-cb4ab5396e00:Release_0"
+            }
+          },
+          "NA": {
+            "endpoint": {
+              "uri": "arn:aws:lambda:us-east-1:746669749825:function:94b2f7e1-7e8e-4699-a03f-cb4ab5396e00:Release_0"
+            }
+          },
+          "FE": {
+            "endpoint": {
+              "uri": "arn:aws:lambda:us-west-2:746669749825:function:94b2f7e1-7e8e-4699-a03f-cb4ab5396e00:Release_0"
+            }
+          }
+        }
+      }
+    },
+    "manifestVersion": "1.0",
+    "permissions": [
+      {
+        "name": "alexa::profile:given_name:read"
+      }
+    ],
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "locales": {
+        "fr-FR": {
+          "termsOfUseUrl": "",
+          "privacyPolicyUrl": "http://mypodcast.vercel.app/policy"
+        }
+      },
+      "containsAds": false,
+      "isExportCompliant": true,
+      "isChildDirected": false,
+      "usesPersonalInfo": false
+    }
+  }
+}
