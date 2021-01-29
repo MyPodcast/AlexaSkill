@@ -1,7 +1,7 @@
 /* *
  * ****************************************************************************************************************
  * Skill : MyPodcast
- * Version : 1.1.0
+ * Version : 1.2.0
  * Authors : Evann DREUMONT
  *              backend : Github gist hosting podcast url, gist link and auto recovery with account linking
  *                        web site for editing, updating podcasts list & 
@@ -9,6 +9,10 @@
  *              frontend : Alexa's build skill, Intent, Audioplayer Handling
  * ----------------------------------------------------------------------------------------------------------------
  * Updates :
+ *              - 24/01/2021 v1.1.0 Initial Release
+ *              - 25/01/2012 v1.2.0 Handling controls on screen device and adding AudioMetadata Picture for screens
+ *              -                   Debbuging getGithubtoken function
+ *
  * ****************************************************************************************************************
  * */
 
@@ -105,12 +109,18 @@ const RestartSoundHandler = {
     async handle(handlerInput) {
         const AudioPlayer = handlerInput.requestEnvelope.context.AudioPlayer;
         const i = searchPodcast(AudioPlayer, podcasts)
-        const podcast = podcasts[i]
-        console.log(podcast)
+        let AudioItemMetadata = {}
+        AudioItemMetadata.title = podcasts[i].title;
+        var audioimageEnclosure = {
+            "sources": [{
+                "url": podcasts[i].img
+            }]
+        };
+        AudioItemMetadata.art = audioimageEnclosure;
         return handlerInput.responseBuilder
-            .speak(`Je reprends au début : ${podcast.name}`)
-            .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, 0, null)
-            .withSimpleCard(podcast.name, podcast.synopsis)
+            .speak(`Je reprends au début : ${podcasts[i].name}`)
+            .addAudioPlayerPlayDirective('REPLACE_ALL', podcasts[i].url, podcasts[i].id, 0, null, AudioItemMetadata)
+            .withSimpleCard(podcasts[i].name, podcasts[i].synopsis)
             .getResponse();
     }
 };
@@ -131,16 +141,24 @@ const TitleHandler = {
         } else {
             state = "joue";
         }
+        let AudioItemMetadata = {}
+        AudioItemMetadata.title = podcasts[podcastnumber].title;
+        var audioimageEnclosure = {
+            "sources": [{
+                "url": podcasts[podcastnumber].img
+            }]
+        };
+        AudioItemMetadata.art = audioimageEnclosure;
         return handlerInput.responseBuilder
             .speak(`OK je ${state} le titre ${podcastnumber+1} <break time="1s"/> ${podcasts[podcastnumber].name}`)
-            .addAudioPlayerPlayDirective('REPLACE_ALL', podcasts[podcastnumber].url, podcasts[podcastnumber].id, podcasts[podcastnumber].offset, null)
+            .addAudioPlayerPlayDirective('REPLACE_ALL', podcasts[podcastnumber].url, podcasts[podcastnumber].id, podcasts[podcastnumber].offset, null, AudioItemMetadata)
             .withSimpleCard(podcasts[podcastnumber].name, podcasts[podcastnumber].synopsis)
             .getResponse();
     }
 };
 
 // ----------------------------------------------------------------------------------------------------------------
-// Intent TitleIntent : Play the title number of the podcasts list
+// Intent SynopsisIntent : Tell us about th synopsis or resume of the podcast
 // ---------------------------------------------------------------------------------------------------------------- 
 const SynopsisHandler = {
     canHandle(handlerInput) {
@@ -261,10 +279,16 @@ const NextPlaybackHandler = {
         const token = getGithubToken(handlerInput);
         let i = searchPodcast(AudioPlayer, podcasts)
         const next = Number(i) + 1;
-        console.log(next)
         const podcast = podcasts[next]
-        console.log(podcast)
-            // Sauvegarde de l'offset actuel
+        let AudioItemMetadata = {}
+        AudioItemMetadata.title = podcasts[next].title;
+        var audioimageEnclosure = {
+            "sources": [{
+                "url": podcasts[next].img
+            }]
+        };
+        AudioItemMetadata.art = audioimageEnclosure;
+        // Sauvegarde de l'offset actuel
         podcasts[i].offset = offset;
         podcasts[i].lastopen = handlerInput.requestEnvelope.request.timestamp;
         UpdatePodcasts(podcasts, gist.url, token);
@@ -273,7 +297,7 @@ const NextPlaybackHandler = {
         if (podcast !== undefined) {
             return handlerInput.responseBuilder
                 .speak(`Titre ${next+1} : ${podcast.name}`)
-                .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, podcast.offset - 500, null)
+                .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, podcast.offset - 500, null, AudioItemMetadata)
                 .withSimpleCard(podcast.name, podcast.synopsis)
                 .getResponse();
         } else {
@@ -305,8 +329,15 @@ const PreviousPlaybackHandler = {
         let i = searchPodcast(AudioPlayer, podcasts)
         const prev = Number(i) - 1;
         const podcast = podcasts[prev]
-        console.log(podcast)
-            // Sauvegarde de l'offset actuel
+        let AudioItemMetadata = {}
+        AudioItemMetadata.title = podcasts[prev].title;
+        var audioimageEnclosure = {
+            "sources": [{
+                "url": podcasts[prev].img
+            }]
+        };
+        AudioItemMetadata.art = audioimageEnclosure;
+        // Sauvegarde de l'offset actuel
         podcasts[i].offset = offset;
         podcasts[i].lastopen = handlerInput.requestEnvelope.request.timestamp;
         UpdatePodcasts(podcasts, gist.url, token);
@@ -314,7 +345,7 @@ const PreviousPlaybackHandler = {
         if (podcast !== undefined) {
             return handlerInput.responseBuilder
                 .speak(`Titre ${prev+1} : ${podcast.name}`)
-                .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, podcast.offset - 500, null)
+                .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, podcast.offset - 500, null, AudioItemMetadata)
                 .withSimpleCard(podcast.name, podcast.synopsis)
                 .getResponse();
         } else {
@@ -341,10 +372,18 @@ const ForwardHandler = {
         const AudioPlayer = handlerInput.requestEnvelope.context.AudioPlayer;
         const offset = AudioPlayer.offsetInMilliseconds;
         const podcast = getPodcast(AudioPlayer, podcasts);
+        let AudioItemMetadata = {}
+        AudioItemMetadata.title = podcast.title;
+        var audioimageEnclosure = {
+            "sources": [{
+                "url": podcast.img
+            }]
+        };
+        AudioItemMetadata.art = audioimageEnclosure;
         const delay = Number(handlerInput.requestEnvelope.request.intent.slots.Delay_up.value)
         return handlerInput.responseBuilder
             .speak(`J'avance de ${delay} secondes`) // à supprimer en prod
-            .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, offset + (delay * 1000), null)
+            .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, offset + (delay * 1000), null, AudioItemMetadata)
             .withSimpleCard(podcast.name, `>>> ${delay}s >>>`)
             .getResponse();
     },
@@ -365,10 +404,18 @@ const BackwardHandler = {
         const AudioPlayer = handlerInput.requestEnvelope.context.AudioPlayer;
         const offset = AudioPlayer.offsetInMilliseconds;
         const podcast = getPodcast(AudioPlayer, podcasts);
+        let AudioItemMetadata = {}
+        AudioItemMetadata.title = podcast.title;
+        var audioimageEnclosure = {
+            "sources": [{
+                "url": podcast.img
+            }]
+        };
+        AudioItemMetadata.art = audioimageEnclosure;
         const delay = Number(handlerInput.requestEnvelope.request.intent.slots.Delay_down.value)
         return handlerInput.responseBuilder
             .speak(`Je recule de ${delay} secondes`) // à supprimer en prod
-            .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, offset - (delay * 1000), null)
+            .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, offset - (delay * 1000), null, AudioItemMetadata)
             .withSimpleCard(podcast.name, `<<< ${delay}s <<<`)
             .getResponse();
     },
@@ -378,13 +425,15 @@ const BackwardHandler = {
 // ----------------------------------------------------------------------------------------------------------------
 // AudioPlayerEventHandler : handling AudioPlayer actions
 // ---------------------------------------------------------------------------------------------------------------- 
-
 const AudioPlayerEventHandler = {
     canHandle(handlerInput) {
         const request = handlerInput.requestEnvelope.request;
 
         return request.type === 'AudioPlayer.PlaybackStarted' ||
             request.type === 'AudioPlayer.PlaybackStopped' ||
+            request.type === 'PlaybackController.PlayCommandIssued' ||
+            request.type === 'PlaybackController.NextCommandIssued' ||
+            request.type === 'PlaybackController.PreviousCommandIssued' ||
             request.type === 'AudioPlayer.PlaybackNearlyFinished' ||
             request.type === 'AudioPlayer.PlaybackFailed';
     },
@@ -392,17 +441,47 @@ const AudioPlayerEventHandler = {
         const request = handlerInput.requestEnvelope.request;
         const AudioPlayer = handlerInput.requestEnvelope.context.AudioPlayer;
         const offset = AudioPlayer.offsetInMilliseconds;
-        const token = getGithubToken(handlerInput);
-        const i = searchPodcast(AudioPlayer, podcasts)
-        var podcast = podcasts[i]
-
+        let i = searchPodcast(AudioPlayer, podcasts);
+        const next = Number(i) + 1;
+        const prev = Number(i) - 1;
+        const current = Number(i);
+        let AudioItemMetadata = {};
+        var audioimageEnclousre = {};
         switch (request.type) {
 
             case 'AudioPlayer.PlaybackStarted':
-
                 return handlerInput.responseBuilder
-                    .addAudioPlayerPlayDirective('REPLACE_ALL', podcast.url, podcast.id, offset, null)
-                    .withSimpleCard(podcast.name, podcast.synopsis)
+                    .getResponse();
+
+            case 'PlaybackController.PlayCommandIssued':
+                return handlerInput.responseBuilder
+                    .addAudioPlayerPlayDirective('REPLACE_ALL', podcasts[current].url, podcasts[current].id, offset, null)
+                    .getResponse();
+
+            case 'PlaybackController.NextCommandIssued':
+                AudioItemMetadata.title = podcasts[next].title;
+                audioimageEnclousre = {
+                    "sources": [{
+                        "url": podcasts[next].img
+                    }]
+                };
+                AudioItemMetadata.art = audioimageEnclousre;
+                AudioItemMetadata.subtitle = podcasts[next].synopsis
+                return handlerInput.responseBuilder
+                    .addAudioPlayerPlayDirective('REPLACE_ALL', podcasts[next].url, podcasts[next].id, podcasts[next].offset, null, AudioItemMetadata)
+                    .getResponse();
+
+            case 'PlaybackController.PreviousCommandIssued':
+                AudioItemMetadata.title = podcasts[prev].title;
+                audioimageEnclousre = {
+                    "sources": [{
+                        "url": podcasts[prev].img
+                    }]
+                };
+                AudioItemMetadata.art = audioimageEnclousre;
+                AudioItemMetadata.subtitle = podcasts[prev].synopsis
+                return handlerInput.responseBuilder
+                    .addAudioPlayerPlayDirective('REPLACE_ALL', podcasts[prev].url, podcasts[prev].id, podcasts[prev].offset, null, AudioItemMetadata)
                     .getResponse();
 
             case 'AudioPlayer.PlaybackFinished':
@@ -410,37 +489,24 @@ const AudioPlayerEventHandler = {
                     .getResponse();
 
             case 'AudioPlayer.PlaybackStopped':
-                podcasts[i].offset = offset;
-                podcasts[i].state = "in_read";
-                podcasts[i].lastopen = handlerInput.requestEnvelope.request.timestamp;
-                UpdatePodcasts(podcasts, gist.url, token);
                 return handlerInput.responseBuilder
-                    .addAudioPlayerStopDirective()
-                    .speak(`Lecture en pause`) // à supprimer en prod
-                    .withSimpleCard(podcast.name, 'Pause')
                     .getResponse();
 
             case 'AudioPlayer.PlaybackNearlyFinished':
-                const offset = 0;
-                const i = searchPodcast(AudioPlayer, podcasts)
-                podcast = podcasts[i]
-                podcasts[i].offset = offset;
-                podcasts[i].state = "read";
-                UpdatePodcasts(podcasts, gist.url, token);
-                if (podcasts[i + 1] !== null) {
-                    const nextpodcast = podcasts[i + 1]
-                    return handlerInput.responseBuilder
-                        .addAudioPlayerPlayDirective('ENQUEUE', nextpodcast.url, nextpodcast.token, nextpodcast.offset, podcasts[i - 1].token)
-                        .getResponse();
-                } else {
-                    return handlerInput.responseBuilder
-                        .speak(`Il n'y a plus de podcast à lire. Bonne nuit et à demain!`)
-                        .withShouldEndSession(true)
-                        .getResponse();
-                }
+                AudioItemMetadata.title = podcasts[next].title;
+                audioimageEnclousre = {
+                    "sources": [{
+                        "url": podcasts[next].img
+                    }]
+                };
+                AudioItemMetadata.art = audioimageEnclousre;
+                AudioItemMetadata.subtitle = podcasts[next].synopsis
+
+                return handlerInput.responseBuilder
+                    .addAudioPlayerPlayDirective('ENQUEUE', podcasts[next].url, podcasts[next].id, podcasts[next].offset, null, AudioItemMetadata)
+                    .getResponse();
 
             case 'AudioPlayer.PlaybackFailed':
-                console.error('Playback Failed');
                 break;
         }
 
@@ -456,7 +522,7 @@ const ErrorHandler = {
         return true;
     },
     handle(handlerInput, error) {
-        console.error(`Error handled: ${error.message}`);
+        console.error(`Error handled: ${error}`);
 
         return handlerInput.responseBuilder
             .speak(`Oh non ! La skill a eu un problème. Réessayer plus tard !`)
@@ -755,7 +821,7 @@ async function UpdatePodcasts(podcasts, raw_url, token) {
 // getGithubToken(handlerInput) : return Github token
 // ---------------------------------------------------------------------------------------------------------------- 
 function getGithubToken(handlerInput) {
-    return handlerInput.requestEnvelope.session.user.accessToken
+    return handlerInput.requestEnvelope.context.System.user.accessToken;
 }
 
 // ----------------------------------------------------------------------------------------------------------------
@@ -763,7 +829,7 @@ function getGithubToken(handlerInput) {
 // ---------------------------------------------------------------------------------------------------------------- 
 function isAccountLinked(handlerInput) {
     // if there is an access token, then assumed linked
-    return (handlerInput.requestEnvelope.session.user.accessToken === undefined);
+    return (getGithubToken(handlerInput) === undefined)
 }
 
 // ----------------------------------------------------------------------------------------------------------------
@@ -789,6 +855,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         CheckAccountPermissionHandler,
         CheckGist,
         CheckPodcasts,
+        AudioPlayerEventHandler,
         LaunchRequestHandler,
         StartSoundHandler,
         RestartSoundHandler,
@@ -800,7 +867,6 @@ exports.handler = Alexa.SkillBuilders.custom()
         PreviousPlaybackHandler,
         ForwardHandler,
         BackwardHandler,
-        AudioPlayerEventHandler,
         SynopsisHandler,
         HelpHandler,
         LastHandler,
