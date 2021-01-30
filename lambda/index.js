@@ -1,7 +1,7 @@
 /* *
  * ****************************************************************************************************************
  * Skill : MyPodcast
- * Version : 1.2.0
+ * Version : 1.2.1
  * Authors : Evann DREUMONT
  *              backend : Github gist hosting podcast url, gist link and auto recovery with account linking
  *                        web site for editing, updating podcasts list & 
@@ -12,6 +12,7 @@
  *              - 24/01/2021 v1.1.0 Initial Release
  *              - 25/01/2012 v1.2.0 Handling controls on screen device and adding AudioMetadata Picture for screens
  *              -                   Debbuging getGithubtoken function
+ *
  *
  * ****************************************************************************************************************
  * */
@@ -166,7 +167,6 @@ const SynopsisHandler = {
             handlerInput.requestEnvelope.request.intent.name === 'SynopsisIntent';
     },
     async handle(handlerInput) {
-        var gist = await getGist(getGithubToken(handlerInput));
         let podcastnumber = handlerInput.requestEnvelope.request.intent.slots.SynTitle.value - 1;
         return handlerInput.responseBuilder
             .speak(`Le synopsis du titre ${podcastnumber+1} ${podcasts[podcastnumber].name} est ${podcasts[podcastnumber].synopsis}`)
@@ -435,6 +435,7 @@ const AudioPlayerEventHandler = {
             request.type === 'PlaybackController.NextCommandIssued' ||
             request.type === 'PlaybackController.PreviousCommandIssued' ||
             request.type === 'AudioPlayer.PlaybackNearlyFinished' ||
+            request.type === 'AudioPlayer.PlaybackFinished' ||
             request.type === 'AudioPlayer.PlaybackFailed';
     },
     async handle(handlerInput) {
@@ -503,7 +504,7 @@ const AudioPlayerEventHandler = {
                 AudioItemMetadata.subtitle = podcasts[next].synopsis
 
                 return handlerInput.responseBuilder
-                    .addAudioPlayerPlayDirective('ENQUEUE', podcasts[next].url, podcasts[next].id, podcasts[next].offset, null, AudioItemMetadata)
+                    .addAudioPlayerPlayDirective('REPLACE_ENQUEUED', podcasts[next].url, podcasts[next].id, podcasts[next].offset, null, AudioItemMetadata)
                     .getResponse();
 
             case 'AudioPlayer.PlaybackFailed':
