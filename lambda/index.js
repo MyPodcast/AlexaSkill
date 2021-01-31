@@ -200,7 +200,7 @@ const TitleHandler = {
 		} else {
 			return handlerInput.responseBuilder
 				.speak(`Le titre ${podcastnumber} n'existe pas !`)
-				.repromt(
+				.reprompt(
 					`Quel titre voulez vous jouer? Dites par exemple joue le titre 1.`
 				)
 				.getResponse();
