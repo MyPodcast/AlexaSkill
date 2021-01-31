@@ -1,26 +1,26 @@
 {
-  "name": "mypodcast",
-  "version": "1.0.0",
-  "description": "fully free alexa skill for playing a list of podcast stored in a gist",
-  "main": "index.js",
-  "authors": [
-    "Evann DREUMONT",
-    "BDR"
-  ],
-  "license": "AGPL-3.0",
-  "homepage": "https://mypodcast.vercel.app",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MyPodcast/AlexaSkill.git"
-  },
-  "bugs": {
-    "url": "https://github.com/MyPodcast/AlexaSkill/issues"
-  },
-  "dependencies": {
-    "ask-sdk-core": "^2.7.0",
-    "ask-sdk-model": "^1.19.0",
-    "aws-sdk": "^2.326.0",
-    "axios": "^0.21.1",
-    "js-logger": "^1.6.1"
-  }
+	"name": "mypodcast",
+	"version": "1.0.0",
+	"description": "fully free alexa skill for playing a list of podcast stored in a gist",
+	"main": "index.js",
+	"authors": [
+		"Evann DREUMONT",
+		"BDR"
+	],
+	"license": "AGPL-3.0",
+	"homepage": "https://mypodcast.vercel.app",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/MyPodcast/AlexaSkill.git"
+	},
+	"bugs": {
+		"url": "https://github.com/MyPodcast/AlexaSkill/issues"
+	},
+	"dependencies": {
+		"ask-sdk-core": "^2.7.0",
+		"ask-sdk-model": "^1.19.0",
+		"aws-sdk": "^2.326.0",
+		"axios": "^0.21.1",
+		"js-logger": "^1.6.1"
+	}
 }
