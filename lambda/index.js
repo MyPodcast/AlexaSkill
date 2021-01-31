@@ -661,7 +661,10 @@ const ErrorHandler = {
 		return true;
 	},
 	handle(handlerInput, error) {
-		console.error(`Error handled: ${error}`);
+		Logger.error(
+			"An error was handled during skill process, trace :",
+			error
+		);
 
 		return handlerInput.responseBuilder
 			.speak(`Oh non ! La skill a eu un problème. Réessayer plus tard !`)
@@ -670,7 +673,7 @@ const ErrorHandler = {
 };
 
 // ----------------------------------------------------------------------------------------------------------------
-// HelpHandler : Handling error send console log and speak error message
+// HelpHandler : Handling help : send instruction message
 // ----------------------------------------------------------------------------------------------------------------
 const HelpHandler = {
 	canHandle(handlerInput) {
@@ -803,14 +806,11 @@ const StartAtOffsetHandler = {
 // ----------------------------------------------------------------------------------------------------------------
 const CheckAccountLinkedHandler = {
 	canHandle(handlerInput) {
-		// If accessToken does not exist (ie, account is not linked),
-		// then return true, which triggers the "need to link" card.
-		// This should not be used unless the skill cannot function without
-		// a linked account.  If there's some functionality which is available without
-		// linking an account, do this check "just-in-time"
+		Logger.info("Cheking if account is correctly linked");
 		return isAccountLinked(handlerInput);
 	},
 	handle(handlerInput) {
+		Logger.warn("Account isn't correctly linked");
 		const speakOutput = `My Podcast nécéssite la connexion a votre compte github, j'envoie les informations de connexion sur votre application Alexa.`;
 		return handlerInput.responseBuilder
 			.speak(speakOutput)
@@ -820,15 +820,55 @@ const CheckAccountLinkedHandler = {
 };
 
 // ----------------------------------------------------------------------------------------------------------------
+// LogResponseInterceptor - For debug purpose permit to log request and repsonse
+// ----------------------------------------------------------------------------------------------------------------
+const LogResponseInterceptor = {
+	process(handlerInput, response) {
+		const request = handlerInput.requestEnvelope;
+		let logLevel = Logger.getLevel();
+		switch (logLevel) {
+			case Logger.INFO:
+				Logger.debug(
+					`Requesting [${request.type}]${
+						request.intent
+							? request.intent.name
+								? ` - [${request.intent.name}] `
+								: ""
+							: ""
+					}`
+				);
+
+			case Logger.DEBUG:
+				Logger.debug(
+					`Requesting [${request.type}]${
+						request.intent
+							? request.intent.name
+								? ` - [${request.intent.name}] `
+								: ""
+							: ""
+					}\n`,
+					request
+				);
+				Logger.debug(`Response :\n`, response);
+				break;
+
+			default:
+				break;
+		}
+	},
+};
+
+// ----------------------------------------------------------------------------------------------------------------
 // CheckGist : Check if the gits is created or not
 // ----------------------------------------------------------------------------------------------------------------
 const CheckGist = {
 	async canHandle(handlerInput) {
-		// Get the gist
+		Logger.info("Getting gist");
 		gist = await getGist(getGithubToken(handlerInput));
 		return gist ? false : true;
 	},
 	handle(handlerInput) {
+		Logger.warn("No gist found");
 		const speakOutput = `My Podcast nécéssite la création d'une liste de podcast pour cela ouvrez l'application web mypodcast vercel`;
 		return handlerInput.responseBuilder.speak(speakOutput).getResponse();
 	},
@@ -839,11 +879,12 @@ const CheckGist = {
 // ----------------------------------------------------------------------------------------------------------------
 const CheckPodcasts = {
 	async canHandle(handlerInput) {
-		// Get the gist
+		Logger.info("Getting podcasts");
 		podcasts = await getPodcasts(gist.raw_url);
 		return podcasts.length ? false : true;
 	},
 	handle(handlerInput) {
+		Logger.warn("No podcasts founds");
 		const speakOutput = `My Podcast nécéssite au moins un podcast pour fonctionner, pour cela ouvrez l'application web mypodcast vercel`;
 		return handlerInput.responseBuilder.speak(speakOutput).getResponse();
 	},
@@ -854,10 +895,12 @@ const CheckPodcasts = {
 // ----------------------------------------------------------------------------------------------------------------
 const CheckAccountPermissionHandler = {
 	canHandle(handlerInput) {
+		Logger.info("Checking Account permission");
 		// If we can update Username, we have PERMISSIONS instead we request PERMISSIONS.
 		return isPermission(handlerInput);
 	},
 	handle(handlerInput) {
+		Logger.info("User doesn't gave permission");
 		const PERMISSIONS = ["alexa::profile:given_name:read"];
 		const speakOutput =
 			"My Podcast nécéssite l'accès a certaines de vos informations personnelles comme votre prénom, j'envoie la procédure d'autorisation nécéssaires sur votre application Alexa.";
@@ -936,7 +979,6 @@ async function getGist(token) {
 	gists = gists.data;
 	for (let i in gists) {
 		if (gists[i].description === "MyPodcast") {
-			//console.log(gists[i])
 			return {
 				id: gists[i].id,
 				url: gists[i].url,
@@ -966,12 +1008,10 @@ async function UpdatePodcasts(podcasts, raw_url, token) {
 		},
 	})
 		.then(function (reponse) {
-			//On traite la suite une fois la réponse obtenue
-			//console.log(reponse);
+			Logger.info("sucessfully updated podcasts");
 		})
-		.catch(function (erreur) {
-			//On traite ici les erreurs éventuellement survenues
-			console.error(erreur);
+		.catch(function (error) {
+			Logger.error("Error while updating podcasts, error :", error);
 		});
 }
 
@@ -998,8 +1038,24 @@ async function isPermission(handlerInput) {
 	try {
 		const upsServiceClient = serviceClientFactory.getUpsServiceClient();
 		username = await upsServiceClient.getProfileGivenName();
+
+		// Update logger and set a prefix with the username
+		let usernameHandler = Logger.createDefaultHandler({
+			formatter: function (messages, context) {
+				messages.unshift(
+					`[${context.level.name}] [${
+						username ? username : "NoUsername"
+					}]`
+				);
+			},
+		});
+		Logger.setHandler(function (messages, context) {
+			usernameHandler(messages, context);
+		});
+
 		return false;
 	} catch (error) {
+		Logger.warn("Insufficient permission, requesting permission");
 		return true;
 	}
 }
@@ -1009,8 +1065,8 @@ async function isPermission(handlerInput) {
 // ****************************************************************************************************************
 exports.handler = Alexa.SkillBuilders.custom()
 	.addRequestHandlers(
-		CheckAccountLinkedHandler,
 		CheckAccountPermissionHandler,
+		CheckAccountLinkedHandler,
 		CheckGist,
 		CheckPodcasts,
 		AudioPlayerEventHandler,
@@ -1032,6 +1088,7 @@ exports.handler = Alexa.SkillBuilders.custom()
 		StartAtOffsetHandler,
 		TitleHandler
 	)
+	.addResponseInterceptors(LogResponseInterceptor)
 	.addErrorHandlers(ErrorHandler)
 	.withApiClient(new Alexa.DefaultApiClient())
 	.lambda();
