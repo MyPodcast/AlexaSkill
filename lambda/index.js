@@ -824,7 +824,7 @@ const CheckAccountLinkedHandler = {
 // ----------------------------------------------------------------------------------------------------------------
 const LogResponseInterceptor = {
 	process(handlerInput, response) {
-		const request = handlerInput.requestEnvelope;
+		const request = handlerInput.requestEnvelope.request;
 		let logLevel = Logger.getLevel();
 		switch (logLevel) {
 			case Logger.INFO:
