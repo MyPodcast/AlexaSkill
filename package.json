@@ -1,22 +1,26 @@
 {
-  "name": "mypodcast",
-  "version": "1.0.0",
-  "description": "fully free alexa skill for playing a list of podcast stored in a gist",
-  "main": "index.js",
-  "authors": [
-    "Evann DREUMONT",
-    "BDR"
-  ],
-  "license": "AGPL-3.0",
-  "homepage": "https://mypodcast.vercel.app",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MyPodcast/AlexaSkill.git"
-  },
-  "bugs": {
-    "url": "https://github.com/MyPodcast/AlexaSkill/issues"
-  },
-  "dependencies": {
-    "ask": "^1.5.0"
-  }
+	"name": "mypodcast",
+	"version": "1.0.0",
+	"description": "fully free alexa skill for playing a list of podcast stored in a gist",
+	"main": "index.js",
+	"authors": [
+		"Evann DREUMONT",
+		"BDR"
+	],
+	"license": "AGPL-3.0",
+	"homepage": "https://mypodcast.vercel.app",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/MyPodcast/AlexaSkill.git"
+	},
+	"bugs": {
+		"url": "https://github.com/MyPodcast/AlexaSkill/issues"
+	},
+	"scripts": {
+		"deploy:dev": "git checkout dev && git pull && git push && git push github && git checkout master && git pull && git merge dev && git push && git push github && git checkout dev",
+		"deploy:prod": "git checkout master && git pull && git push && git push github && git checkout prod && git pull && git merge master && git push && git push github && git checkout master"
+	},
+	"dependencies": {
+		"ask": "^1.5.0"
+	}
 }
