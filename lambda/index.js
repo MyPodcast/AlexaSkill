@@ -1031,11 +1031,7 @@ async function isPermission(handlerInput) {
 		// Update logger and set a prefix with the username
 		let usernameHandler = Logger.createDefaultHandler({
 			formatter: function (messages, context) {
-				messages.unshift(
-					`[${context.level.name}] [${
-						username ? username : "NoUsername"
-					}]`
-				);
+				messages.unshift(`[${username ? username : "NoUsername"}]`);
 			},
 		});
 		Logger.setHandler(function (messages, context) {
