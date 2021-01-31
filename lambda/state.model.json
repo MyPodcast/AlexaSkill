@@ -1,5 +1,0 @@
-exports.state = {
-    notRead = "not_read",
-    read = "read",
-    reading = "in_read",
-}
