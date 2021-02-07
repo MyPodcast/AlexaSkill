@@ -1,7 +1,7 @@
-/* *
+/* **
  * ****************************************************************************************************************
  * Skill : MyPodcast
- * Version : 1.3.1
+ * Version : 1.4.0
  * Authors : Evann DREUMONT
  *              backend : Github gist hosting podcast url, gist link and auto recovery with account linking
  *                        web site for editing, updating podcasts list &
@@ -13,6 +13,9 @@
  *              - 25/01/2021 v1.2.0 Handling controls on screen device and adding AudioMetadata Picture for screens
  *                                  Debbuging getGithubtoken function
  *              - 31/01/2021 v1.3.0 Handling Podcast changing to the next at the end of one podcast + Logger
+ *              - 07/02/2021 v1.4.0 LastPodcast Handling finalized
+ *                                  Enhance Alexa dialogue experience (Bonjour/Bonsoir Time control)
+ *                                  welcome with last playback play proposing if no enumerating the list as before
  *
  *
  * ****************************************************************************************************************
@@ -34,9 +37,9 @@ var podcasts = null;
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // TODO LIST :
-// - Message alexa à l'ouverture Le dernier podcats joué à partir du timestamp!... searchLastPodcast(podcasts) demander le dernier podcast joué?
-// - Ajouter la fonctionnalité Alexa joue mon dernier podcast.
-// - Dialogue la dernière fois vous jouiez tel morceau voulez vous reprendre? oui ou non si non liste des podcasts
+// + Message alexa à l'ouverture Le dernier podcats joué à partir du timestamp!... searchLastPodcast(podcasts) demander le dernier podcast joué?
+// + Ajouter la fonctionnalité Alexa joue mon dernier podcast. OK FAIT
+// + Dialogue la dernière fois vous jouiez tel morceau voulez vous reprendre? oui ou non si non liste des podcasts
 // - Faire une fonction regroupant l'ensemble des requete pour les différents type genre StartPodcast et StopPodcast
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -45,11 +48,36 @@ var podcasts = null;
 // ****************************************************************************************************************
 
 // ----------------------------------------------------------------------------------------------------------------
-// Intent LaunchRequest : play the first podcast of the podcasts list
+// Intent LaunchRequest : Welcome part ALexe propose of continuig Last podcast(yes) or enumerate lits (no)
 // ----------------------------------------------------------------------------------------------------------------
 const LaunchRequestHandler = {
 	canHandle(handlerInput) {
 		return handlerInput.requestEnvelope.request.type === "LaunchRequest";
+	},
+	handle(handlerInput) {
+		var heure = new Date();
+		heure = heure.getHours();
+		let hello;
+		heure > "19" ? (hello = "Bonsoir") : (hello = "Bonjour");
+		return handlerInput.responseBuilder
+			.speak(
+				`${hello} ${username}, voulez vous reprendre la dernière lecture ?`
+			)
+			.reprompt(`Voulez vous reprendre là ou vous en étiez?`)
+			.getResponse();
+	},
+};
+
+// ----------------------------------------------------------------------------------------------------------------
+// Intent No : in response of Launch Request if no then enumerate podcasts list
+// ----------------------------------------------------------------------------------------------------------------
+
+const NoHandler = {
+	canHandle(handlerInput) {
+		return (
+			handlerInput.requestEnvelope.request.intent.name ===
+			"AMAZON.NoIntent"
+		);
 	},
 	async handle(handlerInput) {
 		let names = "";
@@ -68,7 +96,7 @@ const LaunchRequestHandler = {
 		});
 		return handlerInput.responseBuilder
 			.speak(
-				`Bonsoir ${username}, voici les ${number} podcasts de ce soir : ${names}. Quel numéro de titre voulez vous jouer ?`
+				`OK, voici les ${number} podcasts de ce soir : ${names}. Quel numéro de titre voulez vous jouer ?`
 			)
 			.reprompt(`Quel morceau voulez vous jouer ?`)
 			.getResponse();
@@ -721,23 +749,38 @@ const LastHandler = {
 		const request = handlerInput.requestEnvelope.request;
 
 		return (
-			request.type === "IntentRequest" &&
-			request.intent.name === "LastIntent"
+			request.intent.name === "AMAZON.YesIntent" ||
+			(request.type === "IntentRequest" &&
+				request.intent.name === "LastIntent")
 		);
 	},
 	async handle(handlerInput) {
-		var gist = await getGist(getGithubToken(handlerInput));
-		const i = searchLastPodcast(podcasts);
+		const i = Number(searchLastPodcast(podcasts));
+		let AudioItemMetadata = {};
+		AudioItemMetadata.title = podcasts[i].title;
+		var audioimageEnclosure = {
+			sources: [
+				{
+					url: podcasts[i].img,
+				},
+			],
+		};
+		AudioItemMetadata.art = audioimageEnclosure;
 		return handlerInput.responseBuilder
 			.speak(
-				`Le dernier podcast joué était le titre ${i + 1} : ${
+				`Ok je reprend le dernier podcast joué. Titre ${i + 1} : ${
 					podcasts[i].name
 				}`
 			)
-			.withSimpleCard(
-				"Dernier Podcast",
-				`Titre ${i + 1} :  ${podcasts[i].name}`
+			.addAudioPlayerPlayDirective(
+				"REPLACE_ALL",
+				podcasts[i].url,
+				podcasts[i].id,
+				podcasts[i].offset,
+				null,
+				AudioItemMetadata
 			)
+			.withSimpleCard(podcasts[i].name, podcasts[i].synopsis)
 			.getResponse();
 	},
 };
@@ -952,15 +995,17 @@ function searchPodcast(AudioPlayer, podcasts) {
 // searchLastPodcast(AudioPlayer,podcasts) : return the Last podcast played
 // ----------------------------------------------------------------------------------------------------------------
 function searchLastPodcast(podcasts) {
-	let sec = 31536000000;
+	var baseTime = new Date("2021-01-01T00:00:00").valueOf();
+	var timestamp;
 	let j = "";
 	for (let i in podcasts) {
-		if (
-			podcasts[i].timestamp > 0 &&
-			Math.floor(podcasts[i].timestamp) - Math.floor(Date.now()) < sec
-		) {
-			sec = Math.floor(podcasts[i].timestamp) - Math.floor(Date.now());
-			j = i;
+		if (podcasts[i].lastopen) {
+			timestamp = new Date(podcasts[i].lastopen).valueOf();
+			console.log("Podcast ", i, " time : ", timestamp);
+			if (timestamp > baseTime) {
+				baseTime = timestamp;
+				j = i;
+			}
 		}
 	}
 	return j;
@@ -1093,7 +1138,8 @@ exports.handler = Alexa.SkillBuilders.custom()
 		LastHandler,
 		ListHandler,
 		StartAtOffsetHandler,
-		TitleHandler
+		TitleHandler,
+		NoHandler
 	)
 	.addResponseInterceptors(LogResponseInterceptor)
 	.addErrorHandlers(ErrorHandler)
