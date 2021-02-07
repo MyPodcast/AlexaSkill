@@ -54,17 +54,42 @@ const LaunchRequestHandler = {
 	canHandle(handlerInput) {
 		return handlerInput.requestEnvelope.request.type === "LaunchRequest";
 	},
-	handle(handlerInput) {
+	async handle(handlerInput) {
 		var heure = new Date();
 		heure = heure.getHours();
 		let hello;
 		heure > "19" ? (hello = "Bonsoir") : (hello = "Bonjour");
-		return handlerInput.responseBuilder
-			.speak(
-				`${hello} ${username}, voulez vous reprendre la dernière lecture ?`
-			)
-			.reprompt(`Voulez vous reprendre là ou vous en étiez?`)
-			.getResponse();
+		const i = searchLastPodcast(podcasts);
+		Logger.log("Dernier moreceau joué", i);
+		if (i || i === 0) {
+			return handlerInput.responseBuilder
+				.speak(
+					`${hello} ${username}, voulez vous reprendre la dernière lecture ?`
+				)
+				.reprompt(`Voulez vous reprendre là ou vous en étiez?`)
+				.getResponse();
+		} else {
+			let names = "";
+			let state = "";
+			let number = 0;
+			podcasts.map((podcast) => {
+				number++;
+				if (podcast.state === "read") {
+					state = "déjà lu";
+				} else if (podcast.state === "in_read") {
+					state = "en cours de lecture";
+				} else {
+					state = "nouveau";
+				}
+				names += `${number} : ${state}, ${podcast.name} <break time="1s"/>`;
+			});
+			return handlerInput.responseBuilder
+				.speak(
+					`${hello} ${username}, voici les ${number} podcasts de ce soir : ${names}. Quel numéro de titre voulez vous jouer ?`
+				)
+				.reprompt(`Quel morceau voulez vous jouer ?`)
+				.getResponse();
+		}
 	},
 };
 
@@ -997,7 +1022,7 @@ function searchPodcast(AudioPlayer, podcasts) {
 function searchLastPodcast(podcasts) {
 	var baseTime = new Date("2021-01-01T00:00:00").valueOf();
 	var timestamp;
-	let j = "";
+	let j = null;
 	for (let i in podcasts) {
 		if (podcasts[i].lastopen) {
 			timestamp = new Date(podcasts[i].lastopen).valueOf();
