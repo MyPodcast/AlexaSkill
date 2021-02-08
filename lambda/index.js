@@ -298,7 +298,6 @@ const PausePlaybackHandler = {
 		const offset = AudioPlayer.offsetInMilliseconds;
 		const token = getGithubToken(handlerInput);
 		const i = searchPodcast(AudioPlayer, podcasts);
-		const podcast = podcasts[i];
 		podcasts[i].offset = offset;
 		podcasts[i].state = "in_read";
 		podcasts[i].lastopen = handlerInput.requestEnvelope.request.timestamp;
@@ -306,7 +305,7 @@ const PausePlaybackHandler = {
 		return handlerInput.responseBuilder
 			.addAudioPlayerStopDirective()
 			.speak(`Lecture en pause`) // à supprimer en prod
-			.withSimpleCard(podcast.name, "Pause")
+			.withSimpleCard(podcasts[i].name, "Pause")
 			.getResponse();
 	},
 };
