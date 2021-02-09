@@ -1,7 +1,7 @@
 /* **
  * ****************************************************************************************************************
  * Skill : MyPodcast
- * Version : 1.4.1
+ * Version : 1.4.4
  * Authors : Evann DREUMONT
  *              backend : Github gist hosting podcast url, gist link and auto recovery with account linking
  *                        web site for editing, updating podcasts list &
@@ -60,7 +60,7 @@ const LaunchRequestHandler = {
 		let hello;
 		heure > "19" ? (hello = "Bonsoir") : (hello = "Bonjour");
 		const i = searchLastPodcast(podcasts);
-		Logger.log("Dernier moreceau joué", i);
+		Logger.log("Dernier morceau joué", i);
 		if (i || i === 0) {
 			return handlerInput.responseBuilder
 				.speak(
@@ -69,23 +69,10 @@ const LaunchRequestHandler = {
 				.reprompt(`Voulez vous reprendre là ou vous en étiez?`)
 				.getResponse();
 		} else {
-			let names = "";
-			let state = "";
-			let number = 0;
-			podcasts.map((podcast) => {
-				number++;
-				if (podcast.state === "read") {
-					state = "déjà lu";
-				} else if (podcast.state === "in_read") {
-					state = "en cours de lecture";
-				} else {
-					state = "nouveau";
-				}
-				names += `${number} : ${state}, ${podcast.name} <break time="1s"/>`;
-			});
+			let podcastsNames = getNames();
 			return handlerInput.responseBuilder
 				.speak(
-					`${hello} ${username}, voici les ${number} podcasts de ce soir : ${names}. Quel numéro de titre voulez vous jouer ?`
+					`${hello} ${username}, voici les ${podcastsNames.number} podcasts de ce soir : ${podcastsNames.Names}. Quel numéro de titre voulez vous jouer ?`
 				)
 				.reprompt(`Quel morceau voulez vous jouer ?`)
 				.getResponse();
@@ -105,23 +92,10 @@ const NoHandler = {
 		);
 	},
 	async handle(handlerInput) {
-		let names = "";
-		let state = "";
-		let number = 0;
-		podcasts.map((podcast) => {
-			number++;
-			if (podcast.state === "read") {
-				state = "déjà lu";
-			} else if (podcast.state === "in_read") {
-				state = "en cours de lecture";
-			} else {
-				state = "nouveau";
-			}
-			names += `${number} : ${state}, ${podcast.name} <break time="1s"/>`;
-		});
+		let podcastsNames = getNames();
 		return handlerInput.responseBuilder
 			.speak(
-				`OK, voici les ${number} podcasts de ce soir : ${names}. Quel numéro de titre voulez vous jouer ?`
+				`OK, voici les ${podcastsNames.number} podcasts de ce soir : ${podcastsNames.names}. Quel numéro de titre voulez vous jouer ?`
 			)
 			.reprompt(`Quel morceau voulez vous jouer ?`)
 			.getResponse();
@@ -152,12 +126,15 @@ const RestartSoundHandler = {
 			.addAudioPlayerPlayDirective(
 				"REPLACE_ALL",
 				podcasts[i].url,
-				podcasts[i].id,
+				podcasts[i].id ? podcasts[i].id : podcasts[i].url,
 				0,
 				null,
 				setAudioMetadata(podcasts[i])
 			)
-			.withSimpleCard(podcasts[i].name, podcasts[i].synopsis)
+			.withSimpleCard(
+				podcasts[i].name,
+				podcasts[i].synopsis ? podcasts[i].synopsis : ""
+			)
 			.getResponse();
 	},
 };
@@ -186,19 +163,29 @@ const TitleHandler = {
 				.speak(
 					`OK je ${state} le titre ${
 						podcastnumber + 1
-					} <break time="1s"/> ${podcasts[podcastnumber].name}`
+					} <break time="1s"/> ${
+						podcasts[podcastnumber].name
+							? podcasts[podcastnumber].name
+							: "Sans Titre"
+					}`
 				)
 				.addAudioPlayerPlayDirective(
 					"REPLACE_ALL",
 					podcasts[podcastnumber].url,
-					podcasts[podcastnumber].id,
+					podcasts[podcastnumber].id
+						? podcasts[podcastnumber].id
+						: podcasts[podcastnumber].url,
 					podcasts[podcastnumber].offset,
 					null,
 					setAudioMetadata(podcasts[podcastnumber])
 				)
 				.withSimpleCard(
-					podcasts[podcastnumber].name,
+					podcasts[podcastnumber].name
+						? podcasts[podcastnumber].name
+						: "Sans Titre",
 					podcasts[podcastnumber].synopsis
+						? podcasts[podcastnumber].synopsis
+						: ""
 				)
 				.getResponse();
 		} else {
@@ -231,13 +218,23 @@ const SynopsisHandler = {
 			1;
 		return handlerInput.responseBuilder
 			.speak(
-				`Le synopsis du titre ${podcastnumber + 1} ${
+				`Le résumé du titre ${podcastnumber + 1} ${
 					podcasts[podcastnumber].name
-				} est ${podcasts[podcastnumber].synopsis}`
+						? podcasts[podcastnumber].name
+						: "Sans Titre"
+				} est ${
+					podcasts[podcastnumber].synopsis
+						? podcasts[podcastnumber].synopsis
+						: `. Désolé il n'y a pas de résumé pour ce Titre.`
+				}`
 			)
 			.withSimpleCard(
-				podcasts[podcastnumber].name,
+				podcasts[podcastnumber].name
+					? podcasts[podcastnumber].name
+					: "Sans Titre",
 				podcasts[podcastnumber].synopsis
+					? podcasts[podcastnumber].synopsis
+					: ""
 			)
 			.getResponse();
 	},
@@ -332,7 +329,7 @@ const ResumePlaybackHandler = {
 			.addAudioPlayerPlayDirective(
 				"REPLACE_ALL",
 				podcast.url,
-				podcast.id,
+				podcast.id ? podcast.id : podcast.url,
 				offset - 1000,
 				null
 			)
@@ -372,12 +369,15 @@ const NextPlaybackHandler = {
 				.addAudioPlayerPlayDirective(
 					"REPLACE_ALL",
 					podcast.url,
-					podcast.id,
+					podcast.id ? podcast.id : podcast.url,
 					podcast.offset - 500,
 					null,
 					setAudioMetadata(podcasts[i])
 				)
-				.withSimpleCard(podcast.name, podcast.synopsis)
+				.withSimpleCard(
+					podcast.name,
+					podcast.synopsis ? podcast.synopsis : ""
+				)
 				.getResponse();
 		} else {
 			return handlerInput.responseBuilder
@@ -415,16 +415,23 @@ const PreviousPlaybackHandler = {
 		// Bascule sur le nouveau podcastsconst podcast = podcasts[i]
 		if (podcast !== undefined) {
 			return handlerInput.responseBuilder
-				.speak(`Titre ${prev + 1} : ${podcast.name}`)
+				.speak(
+					`Titre ${prev + 1} : ${
+						podcast.name ? podcast.name : "Sans Titre"
+					}`
+				)
 				.addAudioPlayerPlayDirective(
 					"REPLACE_ALL",
 					podcast.url,
-					podcast.id,
+					podcast.id ? podcast.id : podcast.url,
 					podcast.offset - 500,
 					null,
 					setAudioMetadata(podcasts[i])
 				)
-				.withSimpleCard(podcast.name, podcast.synopsis)
+				.withSimpleCard(
+					podcast.name ? podcast.name : "Sans Titre",
+					podcast.synopsis ? podcast.synopsis : ""
+				)
 				.getResponse();
 		} else {
 			return handlerInput.responseBuilder
@@ -460,12 +467,15 @@ const ForwardHandler = {
 			.addAudioPlayerPlayDirective(
 				"REPLACE_ALL",
 				podcast.url,
-				podcast.id,
+				podcast.id ? podcast.id : podcast.url,
 				offset + delay * 1000,
 				null,
 				setAudioMetadata(podcast)
 			)
-			.withSimpleCard(podcast.name, `>>> ${delay}s >>>`)
+			.withSimpleCard(
+				podcast.name ? podcast.name : "Sans Titre",
+				`>>> ${delay}s >>>`
+			)
 			.getResponse();
 	},
 };
@@ -494,12 +504,15 @@ const BackwardHandler = {
 			.addAudioPlayerPlayDirective(
 				"REPLACE_ALL",
 				podcast.url,
-				podcast.id,
+				podcast.id ? podcast.id : podcast.url,
 				offset - delay * 1000,
 				null,
 				setAudioMetadata(podcast)
 			)
-			.withSimpleCard(podcast.name, `<<< ${delay}s <<<`)
+			.withSimpleCard(
+				podcast.name ? podcast.name : "Sans Titre",
+				`<<< ${delay}s <<<`
+			)
 			.getResponse();
 	},
 };
@@ -540,7 +553,9 @@ const AudioPlayerEventHandler = {
 					.addAudioPlayerPlayDirective(
 						"REPLACE_ALL",
 						podcasts[current].url,
-						podcasts[current].id,
+						podcasts[current].id
+							? podcasts[current].id
+							: podcasts[current].url,
 						offset,
 						null
 					)
@@ -551,7 +566,9 @@ const AudioPlayerEventHandler = {
 					.addAudioPlayerPlayDirective(
 						"REPLACE_ALL",
 						podcasts[next].url,
-						podcasts[next].id,
+						podcasts[next].id
+							? podcasts[next].id
+							: podcasts[next].url,
 						podcasts[next].offset,
 						null,
 						setAudioMetadata(podcasts[next])
@@ -563,7 +580,9 @@ const AudioPlayerEventHandler = {
 					.addAudioPlayerPlayDirective(
 						"REPLACE_ALL",
 						podcasts[prev].url,
-						podcasts[prev].id,
+						podcasts[prev].id
+							? podcasts[prev].id
+							: podcasts[prev].url,
 						podcasts[prev].offset,
 						null,
 						setAudioMetadata(podcasts[prev])
@@ -583,7 +602,9 @@ const AudioPlayerEventHandler = {
 					.addAudioPlayerPlayDirective(
 						"REPLACE_ENQUEUED",
 						podcasts[next].url,
-						podcasts[next].id,
+						podcasts[next].id
+							? podcasts[next].id
+							: podcasts[next].url,
 						podcasts[next].offset,
 						null,
 						setAudioMetadata(podcasts[next])
@@ -665,18 +686,21 @@ const LastHandler = {
 		return handlerInput.responseBuilder
 			.speak(
 				`Ok je reprend le dernier podcast joué. Titre ${i + 1} : ${
-					podcasts[i].name
+					podcasts[i].name ? podcasts[i].name : "Sans Titre"
 				}`
 			)
 			.addAudioPlayerPlayDirective(
 				"REPLACE_ALL",
 				podcasts[i].url,
-				podcasts[i].id,
+				podcasts[i].id ? podcasts[i].id : podcasts[i].url,
 				podcasts[i].offset,
 				null,
 				setAudioMetadata(podcasts[i])
 			)
-			.withSimpleCard(podcasts[i].name, podcasts[i].synopsis)
+			.withSimpleCard(
+				podcasts[i].name ? podcasts[i].name : "Sans Titre",
+				podcasts[i].synopsis ? podcasts[i].synopsis : ""
+			)
 			.getResponse();
 	},
 };
@@ -694,24 +718,10 @@ const ListHandler = {
 		);
 	},
 	async handle(handlerInput) {
-		var gist = await getGist(getGithubToken(handlerInput));
-		let names = "";
-		let state = "";
-		let number = 0;
-		podcasts.map((podcast) => {
-			number++;
-			if (podcast.state === "read") {
-				state = "déjà lu";
-			} else if (podcast.state === "in_read") {
-				state = "en cours de lecture";
-			} else {
-				state = "nouveau";
-			}
-			names += `${number} : ${state}, ${podcast.name} <break time="1s"/>`;
-		});
+		let podcastsNames = getNames();
 		return handlerInput.responseBuilder
 			.speak(
-				`Voici la liste des ${number} podcasts disponibles : ${names}. Quel titre voulez vous jouer ?`
+				`Voici la liste des ${podcastsNames.number} podcasts disponibles : ${podcastsNames.names}. Quel titre voulez vous jouer ?`
 			)
 			.reprompt(`Quel morceau voulez vous jouer ?`)
 			.getResponse();
@@ -732,7 +742,6 @@ const StartAtOffsetHandler = {
 	},
 	async handle(handlerInput) {
 		const AudioPlayer = handlerInput.requestEnvelope.context.AudioPlayer;
-		var gist = await getGist(getGithubToken(handlerInput));
 		const podcast = getPodcast(AudioPlayer, podcasts);
 		const offset = Number(
 			handlerInput.requestEnvelope.request.intent.slots.Offset.value
@@ -742,11 +751,15 @@ const StartAtOffsetHandler = {
 			.addAudioPlayerPlayDirective(
 				"REPLACE_ALL",
 				podcast.url,
-				podcast.id,
+				podcast.id ? podcast.id : podcast.url,
 				offset * 1000,
-				null
+				null,
+				setAudioMetadata(podcast)
 			)
-			.withSimpleCard(podcast.name, `Lecture à ${offset}s >>>`)
+			.withSimpleCard(
+				podcast.name ? podcast.name : "Sans Titre",
+				`Lecture à ${offset}s >>>`
+			)
 			.getResponse();
 	},
 };
@@ -866,19 +879,47 @@ const CheckAccountPermissionHandler = {
 // ****************************************************************************************************************
 
 // ----------------------------------------------------------------------------------------------------------------
+// getNames() : return the number and the names of podcasts list
+// ----------------------------------------------------------------------------------------------------------------
+function getNames() {
+	let names = "";
+	let state = "";
+	let number = 0;
+	podcasts.map((podcast) => {
+		number++;
+		if (podcast.state === "read") {
+			state = "déjà lu";
+		} else if (podcast.state === "in_read") {
+			state = "en cours de lecture";
+		} else {
+			state = "nouveau";
+		}
+		names += `${number} : ${state}, ${
+			podcast.name ? podcast.name : "Sans Titre"
+		} <break time="1s"/>`;
+	});
+	return { names, number };
+}
+
+// ----------------------------------------------------------------------------------------------------------------
 // setAudioMetadata(podcast) : return the AudioMetadata of the played podcast
 // ----------------------------------------------------------------------------------------------------------------
 function setAudioMetadata(podcast) {
 	let AudioItemMetadata = {};
-	AudioItemMetadata.title = podcast.title;
+	podcast.name
+		? (AudioItemMetadata.title = podcast.name)
+		: (AudioItemMetadata.title = "Sans Titre");
 	var audioimageEnclosure = {
 		sources: [
 			{
-				url: podcast.img,
+				url: podcast.img
+					? podcast.img
+					: "https://images-na.ssl-images-amazon.com/images/I/71vCwOUSqRL._SL210_.png",
 			},
 		],
 	};
 	AudioItemMetadata.art = audioimageEnclosure;
+	Logger.log(AudioItemMetadata);
 	return AudioItemMetadata;
 }
 
