@@ -108,13 +108,13 @@ const NoHandler = {
 const RestartSoundHandler = {
 	canHandle(handlerInput) {
 		return (
-			(handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+			handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+			(handlerInput.requestEnvelope.request.intent.name ===
+				"RestartIntent" ||
 				handlerInput.requestEnvelope.request.intent.name ===
-					"RestartIntent") ||
-			handlerInput.requestEnvelope.request.intent.name ===
-				"AMAZON.NavigateHomeIntent" ||
-			handlerInput.requestEnvelope.request.intent.name ===
-				"AMAZON.StartOverIntent"
+					"AMAZON.NavigateHomeIntent" ||
+				handlerInput.requestEnvelope.request.intent.name ===
+					"AMAZON.StartOverIntent")
 		);
 	},
 
