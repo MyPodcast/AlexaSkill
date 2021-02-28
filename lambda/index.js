@@ -1,7 +1,7 @@
 /* **
  * ****************************************************************************************************************
  * Skill : MyPodcast
- * Version : 1.4.4
+ * Version : 1.4.5
  * Authors : Evann DREUMONT
  *              backend : Github gist hosting podcast url, gist link and auto recovery with account linking
  *                        web site for editing, updating podcasts list &
@@ -72,7 +72,7 @@ const LaunchRequestHandler = {
 			let podcastsNames = getNames();
 			return handlerInput.responseBuilder
 				.speak(
-					`${hello} ${username}, voici les ${podcastsNames.number} podcasts de ce soir : ${podcastsNames.Names}. Quel numéro de titre voulez vous jouer ?`
+					`${hello} ${username}, voici les ${podcastsNames.number} podcasts de ce soir : ${podcastsNames.names}. Quel numéro de titre voulez vous jouer ?`
 				)
 				.reprompt(`Quel morceau voulez vous jouer ?`)
 				.getResponse();
