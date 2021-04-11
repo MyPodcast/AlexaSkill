@@ -9,8 +9,6 @@ updates:
     directory: "./lambda/" # Location of package manifests
     schedule:
       interval: "daily"
-    reviewers:
-      - "LeGmask"
     target-branch: "dev"
     commit-message:
       prefix: "[deps]"
