@@ -19,10 +19,10 @@ ask-sdk-runtime@^2.10.1:
   resolved "https://registry.yarnpkg.com/ask-sdk-runtime/-/ask-sdk-runtime-2.10.1.tgz#72b8a157c9f5052f43f7f592772cbb1bebd4ce6f"
   integrity sha512-BFEs0UFGvjpKmbYSVhcFa1Oh+eyfCkWULanV+mWTxHTJ7aeB+UsZ8TvkDWZOnHsn0shAFtvkmun4tjx8eOR7uA==
 
-aws-sdk@^2.838.0:
-  version "2.838.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.838.0.tgz#619ada0ab88f0b32903daa07a63fe16b36c84110"
-  integrity sha512-XJUumDE7g/tJeDSpHf8ov0f7Xy6DuIYB2S2pOlwAMwqcOcv166kGNJGFOdAFFt/TodhqPPBP2uTXSE9xaj+tDA==
+aws-sdk@^2.947.0:
+  version "2.947.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.947.0.tgz#2cc329654ad09ee7199ef25bc88f2b0e5a2fc155"
+  integrity sha512-m58mW/0Yg2RnRCJSzWZS8JUMhoBQ4trjKf+uJ3bD24jeV+Nf6iIHQ1s4ogP2O2XXUreSRsJNe8l0cOPSOM37Lg==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
