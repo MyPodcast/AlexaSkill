@@ -2,22 +2,22 @@
 # yarn lockfile v1
 
 
-ask-sdk-core@^2.7.0:
-  version "2.10.1"
-  resolved "https://registry.yarnpkg.com/ask-sdk-core/-/ask-sdk-core-2.10.1.tgz#da9dc1b1e3b23c4e9cb94a088749e70e2ad82698"
-  integrity sha512-C6NaCccoJQaMJYoRlFvS4Yzk3pPTjZF3qAOEyYPZVqOkscZSz0PW25jPhLDwRYp2ynnQbqK9cd6N1APH0Xru7w==
+ask-sdk-core@^2.12.1:
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/ask-sdk-core/-/ask-sdk-core-2.12.1.tgz#ac09877a904b9b7d86a9fc6948cd1af49fad8750"
+  integrity sha512-2fT7XkHfuI0I6g12Y4mztgzmz7SwrKli8Z2p+eut1dVk8t5BHxWVXZCOVI5GVhW0DJbWwhjPSfOTAZX+zPoKEA==
   dependencies:
-    ask-sdk-runtime "^2.10.1"
+    ask-sdk-runtime "^2.12.0"
 
 ask-sdk-model@^1.19.0:
   version "1.34.1"
   resolved "https://registry.yarnpkg.com/ask-sdk-model/-/ask-sdk-model-1.34.1.tgz#d3b957cb2368f27375fd3781ece4d8d6c6df7bac"
   integrity sha512-bnKzRczfmk7uYHtPNFxQbngwUCB7wnL/bAgOKXYehDKiRX3kpoIoZPzpCadSPp9OcyN7Iq6CW1zkADW5IT6CLA==
 
-ask-sdk-runtime@^2.10.1:
-  version "2.10.1"
-  resolved "https://registry.yarnpkg.com/ask-sdk-runtime/-/ask-sdk-runtime-2.10.1.tgz#72b8a157c9f5052f43f7f592772cbb1bebd4ce6f"
-  integrity sha512-BFEs0UFGvjpKmbYSVhcFa1Oh+eyfCkWULanV+mWTxHTJ7aeB+UsZ8TvkDWZOnHsn0shAFtvkmun4tjx8eOR7uA==
+ask-sdk-runtime@^2.12.0:
+  version "2.12.0"
+  resolved "https://registry.yarnpkg.com/ask-sdk-runtime/-/ask-sdk-runtime-2.12.0.tgz#e4b06467a2545ad9fec07379027184374030df38"
+  integrity sha512-5vNTQCjWVnT74Aa39gqBAm3Gvwald0Uu4B1IU4mPTCbBzqEM1XkXkhIc8CWXQOuK7S2SsebjAHEBinrZo+T6lQ==
 
 aws-sdk@^2.838.0:
   version "2.838.0"

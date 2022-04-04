@@ -17,7 +17,7 @@
 		"url": "https://github.com/MyPodcast/AlexaSkill/issues"
 	},
 	"dependencies": {
-		"ask-sdk-core": "^2.7.0",
+		"ask-sdk-core": "^2.12.1",
 		"ask-sdk-model": "^1.19.0",
 		"aws-sdk": "^2.838.0",
 		"axios": "^0.21.1",
